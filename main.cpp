@@ -74,8 +74,7 @@ udp_reply get_connection_id(const char * ip, int port){
         return connect_reply;
     }
 
-    const int64_t proto = htobe64(0x41727101980); //Constant for BitTorrent protocol
-    const char protocol[] = "\x00\x00\x04\x17\x27\x10\x19\x80";
+    const char protocol[] = "\x00\x00\x04\x17\x27\x10\x19\x80"; //Constant for BitTorrent protocol
     int32_t action = htonl(0); //Connection request is zero.
     int32_t txn_id = htonl(std::rand() % 10000 + 1);
 
@@ -97,7 +96,7 @@ udp_reply get_connection_id(const char * ip, int port){
     char * response = (char *) malloc(1024);
     setsockopt(socket_info, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(tv));
     int len = recv(socket_info, response, 1024, 0);
-    // std::cout << "Received.\n";
+
     if (len < 0){
         return connect_reply;
     } else {
@@ -135,8 +134,8 @@ udp_reply scrape_tracker(const char * ip, int port, const char * connection_id, 
     } else {
         char * buffer = (char *) malloc(36); //36 bytes to send scrape request.
 
-        int32_t action = htobe32(2);
-        int32_t txn_id = htonl(std::rand() % 10000 + 1);
+        int32_t action = htobe32(2); //Scrape action
+        int32_t txn_id = htonl(std::rand() % 10000 + 1); //Random transaction ID
         
         int buff_size = 0;
         memcpy(buffer, connection_id, 8);
@@ -178,7 +177,7 @@ void hex2ip(const char * hex){
     mtx.unlock();
 }
 
-udp_reply announce_tracker(const char * ip, int port, const char * connection_id, const char * infohash){
+void announce_tracker(const char * ip, int port, const char * connection_id, const char * infohash){
 
     udp_reply announce_reply;
     announce_reply.reply = "Error";
@@ -187,7 +186,7 @@ udp_reply announce_tracker(const char * ip, int port, const char * connection_id
     int socket_info = socket(AF_INET, SOCK_DGRAM, 0);
     if (socket_info == -1){
         std::cout << "Couldn't create a socket.\n";
-        return announce_reply;
+        return;
     }
 
     timeval tv;
@@ -201,7 +200,7 @@ udp_reply announce_tracker(const char * ip, int port, const char * connection_id
 
     if (connect(socket_info, (sockaddr *) &client, sizeof(client)) < 0){
         std::cout << "Error connecting.\n";
-        return announce_reply;
+        return;
     }
 
     char * buffer = (char *) malloc(98); //Buffer which will hold the hex fo packet;
@@ -248,7 +247,7 @@ udp_reply announce_tracker(const char * ip, int port, const char * connection_id
 
     if (send(socket_info, buffer, bufflen, 0) < 0){
         std::cout << "Error sending the announce.";
-        return announce_reply;
+        return;
     }
 
     char * response = (char *) malloc(1024);
@@ -256,7 +255,7 @@ udp_reply announce_tracker(const char * ip, int port, const char * connection_id
     int len = recv(socket_info, response, 1024, 0);
 
     if (len < 0){
-        return announce_reply;
+        return;
     }
 
     announce_reply.reply = response;
@@ -269,8 +268,6 @@ udp_reply announce_tracker(const char * ip, int port, const char * connection_id
             hex2ip(response + 20 + (i * 6));
         }
     }
-
-    return announce_reply;
 }
 
 void scrape(const char * infohash, std::string ip, int tracker_port, stats &t_stat){
@@ -308,7 +305,7 @@ void announce(const char * infohash, std::string ip, int tracker_port){
     }
 
     memcpy(connection_id, connect_reply.reply + 8, 8);
-    udp_reply announce_reply = announce_tracker(tracker_ip, tracker_port, connection_id, infohash);
+    announce_tracker(tracker_ip, tracker_port, connection_id, infohash);
 
 }
 
