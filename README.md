@@ -1,8 +1,6 @@
 # torrent-stats
-Powerful command line program to retrieve peer list from UDP trackers using multithreading
 
-torrent-stats is a high performance program to query UDP trackers and retrieve extensive peer lists with IP addresses of those who are downloading / uploading. It can also retrieve stats pertaining to Seeds, Completed downloads, and Leechs. It makes use of C sockets and C++11 threads to send hex payloads to the tracker, ensuring maximum performance.
-
+torrent-stats is a high performance program to query UDP trackers and retrieve extensive peer lists with IP addresses of those who are downloading / uploading a particular torrent. It can also retrieve stats pertaining to Seeds, Completed downloads, and Leechs. It makes use of C sockets and C++11 threads to send raw hex UDP packets to the tracker, ensuring maximum performance.
 
 ## Basic Usage
 
